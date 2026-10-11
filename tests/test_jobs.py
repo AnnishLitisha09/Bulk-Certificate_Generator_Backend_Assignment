@@ -147,3 +147,53 @@ def test_list_recipients_nonexistent_job_returns_404(client: TestClient):
     """
     response = client.get("/api/jobs/nonexistent-uuid/recipients/")
     assert response.status_code == 404
+
+
+def test_bulk_download_certificates_zip(client: TestClient):
+    """
+    Test bulk downloading all generated certificates for a job as a single ZIP archive.
+    Verifies HTTP 200, application/zip content type, and internal PDF files within the archive.
+    """
+    import io
+    import zipfile
+
+    payload = {
+        "event_name": "Full Stack Workshop",
+        "organization_name": "Tech Corp",
+        "certificate_title": "Certificate of Completion",
+        "issue_date": "2026-10-11",
+        "recipients": [
+            {"name": "Alice Wonderland", "email": "alice@example.com"},
+            {"name": "Bob Builder", "email": "bob@example.com"}
+        ]
+    }
+    create_res = client.post("/api/jobs/", json=payload)
+    assert create_res.status_code == 201
+    job_id = create_res.json()["id"]
+
+    # Bulk download ZIP
+    zip_res = client.get(f"/api/jobs/{job_id}/download/")
+    assert zip_res.status_code == 200
+    assert zip_res.headers["content-type"] == "application/zip"
+    assert "certificates_" in zip_res.headers.get("content-disposition", "")
+    assert ".zip" in zip_res.headers.get("content-disposition", "")
+
+    # Inspect zip contents
+    with zipfile.ZipFile(io.BytesIO(zip_res.content)) as zf:
+        file_list = zf.namelist()
+        assert len(file_list) == 2
+        for cert_file in file_list:
+            assert cert_file.endswith(".pdf")
+            pdf_bytes = zf.read(cert_file)
+            assert pdf_bytes.startswith(b"%PDF-")
+
+
+def test_bulk_download_nonexistent_job_returns_404(client: TestClient):
+    """
+    Test that bulk downloading a nonexistent job returns HTTP 404.
+    """
+    response = client.get("/api/jobs/00000000-0000-0000-0000-000000000000/download/")
+    assert response.status_code == 404
+    data = response.json()
+    assert "detail" in data
+

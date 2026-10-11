@@ -201,6 +201,18 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("metric-success").textContent = job.successful_count;
         document.getElementById("metric-failed").textContent = job.failed_count;
 
+        // Bulk download ZIP button & container
+        const bulkZipContainer = document.getElementById("bulk-zip-container");
+        const btnZip = document.getElementById("btn-download-zip");
+        if (bulkZipContainer && btnZip) {
+            if (job.successful_count > 0) {
+                btnZip.href = `/api/jobs/${job.id}/download/`;
+                bulkZipContainer.style.display = "block";
+            } else {
+                bulkZipContainer.style.display = "none";
+            }
+        }
+
         // Results table
         const rTbody = document.getElementById("results-tbody");
         rTbody.innerHTML = "";

@@ -3,12 +3,15 @@ Core business logic service for creating, processing, and querying bulk certific
 Keeps route handlers thin and decouples processing logic from HTTP requests.
 """
 
+import io
 import logging
 import uuid
+import zipfile
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
 
 from app.models import (
+    Certificate,
     GenerationJob,
     JobStatus,
     Recipient,
@@ -22,6 +25,8 @@ from app.schemas import (
 )
 from app.services.certificate_service import (
     generate_and_save_certificate,
+    get_certificate_file_path,
+    sanitize_filename,
     validate_recipient_data,
 )
 
@@ -236,3 +241,34 @@ def format_job_response(
         completed_at=job.completed_at,
         recipients=recipients_data,
     )
+
+
+def generate_job_certificates_zip(db: Session, job_id: str) -> Tuple[bytes, str]:
+    """
+    Generate an in-memory ZIP archive of all successfully generated certificates for a job.
+    Returns:
+        (zip_bytes, zip_filename)
+    Raises:
+        LookupError: If job does not exist.
+        ValueError: If job has no successfully generated certificates.
+    """
+    job = get_job_by_id(db=db, job_id=job_id)
+    if not job:
+        raise LookupError(f"Generation job with ID '{job_id}' not found")
+
+    certificates = db.query(Certificate).filter(Certificate.job_id == job_id).all()
+    if not certificates:
+        raise ValueError(f"No generated certificates available for job '{job_id}'")
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for cert in certificates:
+            file_path, filename = get_certificate_file_path(db=db, certificate_id=cert.id)
+            if file_path and file_path.exists():
+                zf.write(file_path, arcname=filename or cert.filename)
+
+    buffer.seek(0)
+    safe_event = sanitize_filename(job.event_name)
+    zip_filename = f"certificates_{safe_event}_{job_id[:8]}.zip"
+    return buffer.getvalue(), zip_filename
+

@@ -384,6 +384,29 @@ button {
     background: #dbeafe;
 }
 
+.btn-bulk-zip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #16a34a;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 0.55rem 1.1rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none !important;
+    border: none;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.btn-bulk-zip:hover {
+    background: #15803d;
+    color: #ffffff !important;
+    box-shadow: var(--shadow-md);
+}
+
 .form-footer {
     margin-top: 1.25rem;
 }

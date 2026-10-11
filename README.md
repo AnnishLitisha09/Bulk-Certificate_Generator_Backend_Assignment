@@ -17,13 +17,14 @@ This project solves these issues with a resilient bulk generation engine, determ
 ## 2. Features
 - **Minimal Studio Frontend**: Built with pure HTML/CSS/Vanilla JS, served directly at `http://localhost:8000/`. Lets you interactively add recipients, load realistic test batches, submit generation jobs, observe progress bars, and download generated certificates.
 - **Bulk Job Processing**: Submit up to 500 recipients per batch with event and certificate metadata.
+- **Bulk Certificate ZIP Download**: Download all successfully generated certificates for a job in a single compressed `.zip` archive via `GET /api/jobs/{job_id}/download/` or one-click button in the UI.
 - **Independent Recipient Validation**: Request-level structural checks reject malformed batches immediately, while recipient-level semantic checks (empty names, invalid email syntax) allow valid recipients in the same batch to succeed.
 - **Fail-Safe Generation Loop**: Utilizes database savepoints to isolate PDF generation crashes; subsequent recipients are processed without data corruption.
 - **Professional PDF Engine**: Native ReportLab certificate generation featuring landscape A4 layout, double borders, corner flourishes, verified seal badge, prominent recipient typography, and customizable body text.
 - **Relational Persistence**: Built with SQLAlchemy 2.x supporting **MySQL** (via `pymysql` with production connection pooling) and SQLite.
 - **Secure Document Delivery**: Stream certificates directly via `/api/certificates/{certificate_id}/` with strict path traversal boundaries and safe download filenames.
 - **Granular Status & Pagination**: Retrieve jobs with dynamic progress percentage and paginate recipient results with optional status filters (`SUCCESS`, `FAILED`, `PENDING`).
-- **Comprehensive Automated Testing**: 16 automated pytest tests covering creation, validation, individual failures, PDF generation, security boundaries, and frontend serving.
+- **Comprehensive Automated Testing**: 18 automated pytest tests covering creation, validation, individual failures, PDF generation, bulk ZIP downloads, security boundaries, and frontend serving.
 
 ---
 
@@ -217,4 +218,5 @@ Run the full automated test suite:
 pytest -v
 ```
 
-**Result**: 16 passed tests covering all endpoints, security boundaries, edge cases, and failure modes.
+**Result**: 18 passed tests covering all endpoints, security boundaries, edge cases, and failure modes.
+

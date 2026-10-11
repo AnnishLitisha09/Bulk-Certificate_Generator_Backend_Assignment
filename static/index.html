@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
     <!-- Top Navigation Header -->
@@ -178,11 +178,25 @@
                             <span class="metric-title">Failed</span>
                         </div>
                     </div>
+
+                    <!-- Prominent Bulk Download ZIP Action -->
+                    <div id="bulk-zip-container" style="display: none; margin-top: 1rem; padding-top: 0.85rem; border-top: 1px dashed var(--border-color); text-align: center;">
+                        <a id="btn-download-zip" href="#" class="btn-bulk-zip">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            📦 Download All Certificates as ZIP
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Recipient Outcomes List -->
                 <div class="job-results-list">
-                    <h3>Generated Certificates & Results</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <h3>Generated Certificates & Results</h3>
+                    </div>
                     <div class="table-responsive">
                         <table class="data-table" id="results-table">
                             <thead>
@@ -207,6 +221,6 @@
         <p>Bulk Certificate Generator &bull; Built with FastAPI, MySQL & ReportLab &bull; Student Technical Assignment</p>
     </footer>
 
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v=3"></script>
 </body>
 </html>

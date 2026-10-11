@@ -3,7 +3,7 @@ API routes for bulk generation job creation, tracking, and queries.
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -16,6 +16,7 @@ from app.services.job_service import (
     create_and_process_job,
     format_job_response,
     format_recipient_response,
+    generate_job_certificates_zip,
     get_job_by_id,
     get_job_recipients,
 )
@@ -104,3 +105,48 @@ def list_job_recipients(
         total_pages=total_pages,
         items=items,
     )
+
+
+@router.get(
+    "/{job_id}/download/",
+    summary="Download all generated certificates as a ZIP archive",
+    description="Streams a compressed ZIP file containing every successfully generated PDF certificate for this job.",
+    responses={
+        200: {
+            "content": {"application/zip": {}},
+            "description": "Returns ZIP archive containing all certificates.",
+        },
+        404: {
+            "description": "Job not found.",
+        },
+        400: {
+            "description": "No generated certificates available for this job.",
+        },
+    },
+)
+def download_all_job_certificates(
+    job_id: str,
+    db: Session = Depends(get_db),
+) -> Response:
+    """Download all generated certificates for a job as a single ZIP archive."""
+    try:
+        zip_bytes, zip_filename = generate_job_certificates_zip(db=db, job_id=job_id)
+    except LookupError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="{zip_filename}"',
+        },
+    )
+

@@ -10,6 +10,7 @@ from app.services.job_service import (
     create_and_process_job,
     format_job_response,
     format_recipient_response,
+    generate_job_certificates_zip,
     get_job_by_id,
     get_job_recipients,
 )
@@ -21,6 +22,7 @@ __all__ = [
     "create_and_process_job",
     "format_job_response",
     "format_recipient_response",
+    "generate_job_certificates_zip",
     "get_job_by_id",
     "get_job_recipients",
 ]
